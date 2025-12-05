@@ -1,0 +1,65 @@
+name: Docker Build and Deploy
+on:
+  workflow_call:
+    inputs:
+      docker_image_tag:
+        description: 'Docker image tag (e.g., username/image:latest)'
+        required: true
+        type: string
+      docker_compose_project_name:
+        description: 'Docker Compose project name'
+        required: true
+        type: string
+      docker_compose_file_path:
+        description: 'Path to docker-compose.yml on the server'
+        required: true
+        type: string
+      deployment_branch:
+        description: 'Branch to deploy from (default: master)'
+        required: false
+        type: string
+        default: 'master'
+    secrets:
+      DOCKERHUB_USERNAME:
+        description: 'Docker Hub username'
+        required: true
+      DOCKERHUB_TOKEN:
+        description: 'Docker Hub access token'
+        required: true
+      DROPLET_HOST:
+        description: 'Deployment server host'
+        required: true
+      DROPLET_USER:
+        description: 'Deployment server SSH username'
+        required: true
+      DROPLET_SSH_KEY:
+        description: 'Deployment server SSH private key'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: ${{ inputs.docker_image_tag }}
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            docker compose -p ${{ inputs.docker_compose_project_name }} -f ${{ inputs.docker_compose_file_path }} pull
+            docker compose -p ${{ inputs.docker_compose_project_name }} -f ${{ inputs.docker_compose_file_path }} up -d
