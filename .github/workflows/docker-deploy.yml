@@ -19,6 +19,11 @@ on:
         required: false
         type: string
         default: 'master'
+      docker_context:
+        description: 'Build context path (default: repo root)'
+        required: false
+        type: string
+        default: '.'
     secrets:
       DOCKERHUB_USERNAME:
         description: 'Docker Hub username'
@@ -51,6 +56,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
+          context: ${{ inputs.docker_context }}
           push: true
           tags: ${{ inputs.docker_image_tag }}
 
