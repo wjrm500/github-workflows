@@ -24,6 +24,11 @@ on:
         required: false
         type: string
         default: '.'
+      dockerfile_path:
+        description: 'Path to Dockerfile relative to docker_context (default: Dockerfile)'
+        required: false
+        type: string
+        default: 'Dockerfile'
     secrets:
       DOCKERHUB_USERNAME:
         description: 'Docker Hub username'
@@ -57,6 +62,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ${{ inputs.docker_context }}
+          file: ${{ inputs.docker_context }}/${{ inputs.dockerfile_path }}
           push: true
           tags: ${{ inputs.docker_image_tag }}
 
