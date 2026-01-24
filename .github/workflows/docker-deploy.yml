@@ -30,6 +30,11 @@ on:
         required: false
         type: string
         default: ''
+      service_name:
+        description: 'Specific service to deploy (if empty, deploys all services)'
+        required: false
+        type: string
+        default: ''
     secrets:
       DOCKERHUB_USERNAME:
         required: true
@@ -70,5 +75,5 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            docker compose -p ${{ inputs.docker_compose_project_name }} -f ${{ inputs.docker_compose_file_path }} pull
-            docker compose -p ${{ inputs.docker_compose_project_name }} -f ${{ inputs.docker_compose_file_path }} up -d
+            docker compose -p ${{ inputs.docker_compose_project_name }} -f ${{ inputs.docker_compose_file_path }} pull ${{ inputs.service_name }}
+            docker compose -p ${{ inputs.docker_compose_project_name }} -f ${{ inputs.docker_compose_file_path }} up -d ${{ inputs.service_name }}
