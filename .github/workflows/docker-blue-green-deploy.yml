@@ -1,0 +1,28 @@
+name: Blue-Green Deploy
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+        description: "Application name (matches blue-green/<app_name>.conf on the server)"
+    secrets:
+      DROPLET_HOST:
+        required: true
+      DROPLET_USER:
+        required: true
+      DROPLET_SSH_KEY:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: /home/ServerConfig/scripts/blue-green-deploy.sh ${{ inputs.app_name }}
