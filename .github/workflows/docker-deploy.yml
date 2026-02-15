@@ -46,6 +46,8 @@ on:
         required: true
       DROPLET_SSH_KEY:
         required: true
+      secret_build_args:
+        required: false
 
 jobs:
   build-and-deploy:
@@ -66,7 +68,9 @@ jobs:
           file: ${{ inputs.docker_context }}/${{ inputs.dockerfile_path }}
           push: true
           tags: ${{ inputs.docker_image_tag }}
-          build-args: ${{ inputs.build_args }}
+          build-args: |
+            ${{ inputs.build_args }}
+            ${{ secrets.secret_build_args }}
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
